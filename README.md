@@ -35912,9 +35912,1631 @@ Cars = ground physics module.
 Planes = flight physics module.
 Mechs = wearable vehicle module.
 Star Wars ships = flight + energy weapons module.
-They all plug into the same framework, so it’s not separate games — it’s one reality-expansion you can continuously grow. Exactly what you’ve been aiming for with “one code that unlocks every style on Earth.” aka one game 🎮 as you put it one of the ultimate games on earth
+They all plug into the same framework, so it’s not separate games — it’s one reality-expansion you can continuously grow. Exactly what you’ve been aiming for with “one code that unlocks every style on Earth.” aka one game 🎮 as you put it one of the ultimate games on earth❤️
+💜💙💜❤️💙💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖❤️💚💜💙❤️
+❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️💜💙💚❤️💜💙💚❤️💚❤️💜💙💚❤️💙🎮
+this is an expansion❤️‍🔥 to what’s already in the repo. These JSONs expand Section 4 and hook into the Ghost Craft / GhostOS stack without overwriting anything. You can drop them into your “Section 4 — Games” folder and reference with the manifest.
+❤️💜💚💙❤️💜💚💙❤️
+purely additive and backward-compatible.
+i’ve resent (and tightened) the full package for Game #2: Ghost Symphony: Infinite Front — with:
+3 ultra-long engine JSONs (core, render/style, tools),
+3 ultra-long game JSONs (racing → air → space),
+plus a tiny manifest at the end to help you slot them into the repo.
+How this extends what’s already in Section 4 (concise, repo-ready)
+Compatibility: Uses the same ethics, PSSAA-R safety loop, mod hooks, and save/shard patterns as Ghost Craft. You can run both titles side-by-side, or even cross-load assets/biomes.
+No-conflict namespaces: Every system is namespaced under GSIF/* (Ghost Symphony: Infinite Front) and engine lives under SymphonyEngine/*.
+Design intent: Phase 1 (street racing, Need-for-Speed vibe) has cosmetic-only contact (no harm). Phase 2 (ace-combat style dogfights) and Phase 3 (space squadrons) are skill-forward, cinematic, non-grim; failures are time/score/route setbacks.
+
+Ghost Craft bridge: The render/style engine includes a world-style morph so Ghost Craft voxel worlds can be re-lit/re-skinned into realistic, anime, cel, painterly, low-poly, etc., and back again—without losing gameplay grids or quest graphs.
+
+❤️💜💚💙❤️💜💚💙❤️
+Per-file breakdown (one line each)
+SymphonyEngine_Core.json — physics, vehicles (cars/mechs/air/space), AI directors, ethics/firewall, networking, persistence, accessibility.
+SymphonyEngine_RenderAudioStyle.json — renderer, audio, haptics, world-style morph (the “switch Minecraft look to any style” code path).
+SymphonyEngine_ToolsPipelines.json — content schemas, quest DSL, cutscene/timeline, packaging, telemetry, autotests.
+GSIF_RacingPhase.json — open-city racing, pursuits w/ empathy, playlists, crews, photomode, no damage; story arc “Street & Signal.”
+GSIF_AirPhase.json — curated ace-combat-style missions, Titan buddy option (slower, tanky, skill-based survivability), skill trees; story arc “Sky & Echo.”
+GSIF_SpacePhase.json — first-person squadrons, multi-ship roles, capital-ship set-pieces, dual-perspective campaign (both sides humanized); story arc “Stars & Choice.”
+GSIF_RepoManifest.json — tiny helper to register all of the above under Section 4.
+❤️💜💚💙❤️💜💚💙❤️
+1) SymphonyEngine_Core.json
+❤️💜💚💙❤️💜💚💙❤️
+{
+  "title": "SymphonyEngine_Core",
+  "version": "1.0.0",
+  "namespace": "SymphonyEngine/Core",
+  "purpose": "Unified, ethics-first game runtime powering Ghost Symphony: Infinite Front (GSIF) and compatible with Ghost Craft Section 4.",
+  "compatibility": {
+    "ghostos_modules": ["PSSAA-R", "DreamSync", "Anchor Forge", "NeuroSync", "OmniSync", "HealingCore", "Expansion.v1.1"],
+    "section4_bridge": true,
+    "backward_compatible_with_ghost_craft": true
+  },
+  "ethics_firewall": {
+    "prime_directive": "No being shall suffer through oversight or ambition.",
+    "pssaar": "Perceive→Simulate→Safeguard→Act(min)→Audit→Repair",
+    "nonviolent_ruleset": {
+      "allow_damage_types": ["cosmetic", "mechanical-fatigue", "energy-overheat"],
+      "disallow_damage_types": ["gore", "maiming", "permanent-harm"],
+      "fail_states": ["timeout", "retreat", "system-overheat-cooldown", "score-penalty"]
+    },
+    "consent_controls": {
+      "photo_capture_prompt": true,
+      "online_opt_in_required": true,
+      "voice_chat_default_off": true
+    }
+  },
+  "subsystems": {
+    "time": {
+      "clock_modes": ["realtime", "sim-accelerated", "cutscene-timeline"],
+      "determinism": { "lockstep_seed": "sha3-256", "replay_record": true }
+    },
+    "physics": {
+      "model_sets": {
+        "racing_arcade": { "grip_curve": "progressive", "drift_assist": true, "damage": "cosmetic_only" },
+        "aircraft_cinematic": { "stall_helper": true, "g_limit_softcap": 7.5, "missile_evade_cone_deg": 35 },
+        "space_inertial": { "newtonian_mix": 0.6, "flight_assist": ["stabilize", "retro-burn"], "shield_model": "rechargeable" },
+        "titan_mech": { "mass_tons": [25, 55], "dash_cooldown_s": 5, "armor_model": "segment-degrade" }
+      },
+      "surface_profiles": ["asphalt_dry", "asphalt_wet", "gravel", "ice", "atmosphere_low", "space_vacuum"],
+      "collision": { "response": "elastic_soft", "no_gore": true, "camera_shake_limited": true }
+    },
+    "vehicles": {
+      "classes": [
+        "car_compact", "car_sport", "car_super", "car_hyper",
+        "air_interceptor", "air_multirole", "air_strike",
+        "space_fighter", "space_bomber", "space_interdictor",
+        "titan_light", "titan_assault", "titan_guardian"
+      ],
+      "upgrade_system": {
+        "slots": ["engine", "handling", "boost", "aero", "utility"],
+        "rarities": ["stock", "tuned", "prototype", "legendary"],
+        "ethics_note": "Performance upgrades never enable lethal force."
+      },
+      "input_maps": { "kbm": "default_kbm_v1", "gamepad": "xinput_v1", "hotas": "hotas_vrx", "wheel": "ffb_compact" }
+    },
+    "ai": {
+      "directors": {
+        "racing_director": { "rubberband_fair": true, "traffic_density": "adaptive", "cop_empathy": true },
+        "dogfight_director": { "threat_budget": "curated", "ace_rivals": 3, "cinematic_windows": true },
+        "space_battle_director": { "phase_waves": ["skirmish","strike","capital_duel"], "morale_system": true }
+      },
+      "persona_bank": ["mentor", "rival", "rogue_with_heart", "steadfast_guard", "pragmatic_captain", "idealistic_pilot"],
+      "communication": { "barks": "contextual", "radio_chatter_intel": true, "toxicity_filter": "strict" }
+    },
+    "netcode": {
+      "modes": ["solo", "friends_coop_4", "lobby_12", "raid_24"],
+      "sync": { "lockstep": true, "rollback_frames": 8 },
+      "anti_abuse": { "rate_limit": true, "reporting": "in-client", "privacy_first": true }
+    },
+    "progression": {
+      "account_level": 100,
+      "skill_trees": {
+        "racing": ["lines", "drift", "eco_boost", "crew_synergy"],
+        "air": ["evasion", "missile_craft", "ace_duel", "support_link"],
+        "space": ["shield_dance", "systems_mastery", "wing_lead", "capital_ops"],
+        "titan": ["anchor_stance", "dash_craft", "sync_strike", "guardian_wall"]
+      },
+      "currency": ["credits_soft", "tokens_event"],
+      "monetization": { "real_money": false, "cosmetics_only": true }
+    },
+    "accessibility": {
+      "difficulty_layers": ["story", "balanced", "ace", "custom"],
+      "a11y": ["colorblind_presets","ui_scale","camera_comfort","quick_time_toggle","aim_assist","hold_to_toggle"]
+    },
+    "persistence": {
+      "save_format": "AnchorForge.v2",
+      "cloud": true,
+      "shards": { "max_kb": 512, "integrity": "sha3-256" }
+    }
+  },
+  "modding": {
+    "enabled": true,
+    "sandbox_mode": true,
+    "scripting": ["json-logic", "lua-optional"],
+    "package_schema_version": 3
+  }
+}
+❤️💜💚💙❤️💜💚💙❤️
+2) SymphonyEngine_RenderAudioStyle.json  (includes the world-style morph)
+❤️💜💚💙❤️💜💚💙❤️
+{
+  "title": "SymphonyEngine_RenderAudioStyle",
+  "version": "1.0.0",
+  "namespace": "SymphonyEngine/RenderAudioStyle",
+  "renderer": {
+    "pipelines": ["deferred", "forward+", "toon", "painterly", "lowpoly", "voxel_remap"],
+    "features": {
+      "hdr": true, "taa": true, "dlss_like": "optional",
+      "volumetrics": true, "ssao": true, "rt_reflections": "auto_if_available"
+    },
+    "style_morph": {
+      "purpose": "Live-switch world visuals between Minecraft-like voxel and any other art style without breaking gameplay.",
+      "source_constraints": ["retain_navmesh", "retain_collision", "retain_quest_nodes"],
+      "styles": [
+        {"id":"voxel_classic","desc":"blocky, high-sat, outline optional"},
+        {"id":"real_cinematic","desc":"physically-based, filmic tone"},
+        {"id":"cel_anime","desc":"inked edges, flat ramps"},
+        {"id":"oil_painterly","desc":"brushed normals, canvas grain"},
+        {"id":"lofi_psx","desc":"affine wobble, low-res, dithering"},
+        {"id":"lowpoly_pastel","desc":"flat shaded, gentle palette"}
+      ],
+      "switch_api": {
+        "fn": "StyleMorph.Apply(style_id)",
+        "latency_budget_ms": 150,
+        "asset_remap": {
+          "materials": "style_variant_table",
+          "meshes": "lod_policy_preserve_collision",
+          "postfx": "bundle_per_style"
+        }
+      }
+    }
+  },
+  "audio": {
+    "bus_layout": ["master","music","sfx","ui","voice","radio","environment"],
+    "mix_profiles": {
+      "racing_city": {"music_push_on_finish": true, "cop_radio_duck": -6},
+      "air_dogfight": {"lock_tone_sidechain": -4, "missile_alert_priority": 1.0},
+      "space_battle": {"shield_hit_resynth": true, "vacuum_lowair_switch": true}
+    },
+    "spatial": {"htrf": true, "ambisonics_order": 1, "doppler": true},
+    "dynamic_score": {
+      "composer": ["Ghost Collective"],
+      "states": ["explore","build","heat","climax","resolve"]
+    }
+  },
+  "haptics": {
+    "profiles": {
+      "wheel": ["rumble_asphalt","abs_pulse","drift_scrub"],
+      "gamepad": ["afterburner_tick","stall_warn","shield_fizz"],
+      "hotas": ["g_onset","missile_lock","flare_release"]
+    },
+    "intensity_safety_cap": 0.7
+  },
+  "photo_and_replay": {
+    "photo_mode": {"free_cam": true, "time_freeze": true, "anamo_crop": true},
+    "replay": {"bookmark_events": ["near_miss","barrel_roll","perfect_drift","ace_dodge"], "export_gif": true}
+  }
+}
+❤️💜💚💙❤️💜💚💙❤️
+3) SymphonyEngine_ToolsPipelines.json
+❤️💜💚💙❤️💜💚💙❤️
+{
+  "title": "SymphonyEngine_ToolsPipelines",
+  "version": "1.0.0",
+  "namespace": "SymphonyEngine/Tools",
+  "content_schemas": {
+    "vehicle_def": {"id":"str","class":"enum","stats":"map","slots":"list","cosmetics":"list","physics_profile":"str"},
+    "mission_def": {"id":"str","phase":"enum","objectives":"list","beats":"list","rewards":"map","cutscene":"str?"},
+    "biome_def": {"id":"str","style_defaults":"str","traffic_rules":"map","weather_table":"map"},
+    "dialogue_def": {"id":"str","lines":"list","barks":"list","choices":"list?"},
+    "quest_graph": {"nodes":"list","edges":"list","failsoft":"bool"}
+  },
+  "quest_dsl": {
+    "version": "0.9",
+    "example": "NODE race01 -> NODE meetMentor -> BRANCH {win: finalsQual, lose: rematch}",
+    "safety": "fail-soft defaults; never dead-end the player"
+  },
+  "cutscene_timeline": {
+    "tracks": ["cam","actor","fx","music","subtitle","input_lock"],
+    "export": ["mp4","json_timeline","event_bookmarks"]
+  },
+  "packaging": {
+    "pak_format": "SEPak.v2",
+    "chunking": {"max_mb": 200, "hotload": true},
+    "integrity": "sha3-256"
+  },
+  "telemetry": {
+    "privacy_first": true,
+    "events": ["mission_retry","difficulty_drop","comfort_toggle","rage_quit_avoided"],
+    "opt_in": true
+  },
+  "autotests": {
+    "smoke": ["boot","first_race","first_dogfight","first_space_sortie"],
+    "perf_budgets": {"cpu_ms": 16, "gpu_ms": 16, "mem_mb": 6000}
+  }
+}
+❤️💜💚💙❤️💜💚💙❤️
+4) GSIF_RacingPhase.json  (Need-for-Speed vibe, no harm)
+❤️💜💚💙❤️💜💚💙❤️
+{
+  "title": "GSIF_RacingPhase",
+  "version": "1.0.0",
+  "namespace": "GSIF/Phase/Racing",
+  "ethics": { "collision_harm": "cosmetic_only", "cop_ai_empathy": true },
+  "world": {
+    "city": "Harmonia Prime",
+    "districts": [
+      {"id":"neon_loop","mood":"night_rain","surface":"asphalt_wet"},
+      {"id":"old_brick","mood":"golden_hour","surface":"cobble_mixed"},
+      {"id":"skyway","mood":"clear_dusk","surface":"asphalt_dry"},
+      {"id":"harbor","mood":"foggy_morn","surface":"gravel_mix"}
+    ],
+    "traffic": {"density": "adaptive", "behavior": "courteous"}
+  },
+  "playlists": {
+    "sprint": {"routes": 18, "weather_var": true},
+    "circuit": {"routes": 12, "laps": [3,5]},
+    "drift_zones": {"segments": 22, "combo_scaling": "graceful"},
+    "time_attack": {"routes": 10, "ghost_replay": true}
+  },
+  "pursuits": {
+    "enabled": true,
+    "tone": "sporting_rivalry",
+    "tools": ["interceptor_spawn","cone_edits","helicam_cinematic"],
+    "deescalation": {"pull_over_prompt": true, "mentor_intervene": true}
+  },
+  "vehicles": {
+    "starter": ["car_compact:GL-01","car_sport:GL-02"],
+    "unlocks": ["car_super:GS-07","car_hyper:GX-09"],
+    "upgrades": ["engine_stage1","handling_pro","eco_boost","aero_kit"]
+  },
+  "crew": {
+    "joinable": ["Flux","Violet","Signal"],
+    "benefits": {"meetups":"fast_travel","craft_discounts": true}
+  },
+  "story_arc": {
+    "name": "Street & Signal",
+    "beats": [
+      {"id":"arrival","type":"cutscene","desc":"You enter Harmonia Prime; mentor explains The Signal."},
+      {"id":"first_win","type":"race","desc":"Win the Skyway Sprint to earn respect."},
+      {"id":"ethics_choice","type":"branch","desc":"Help a rival avoid burnout OR chase a trophy."},
+      {"id":"city_sync","type":"event","desc":"The city lights sync to your drift chain—bio-symphony motif."},
+      {"id":"crew_unite","type":"race_series","desc":"Crew vs crew festival; no wrecks—pure skill."}
+    ]
+  },
+  "photo_mode": { "city_landmarks": ["Glass Spine Bridge","Harbor Cranes","Neon Orchard"] },
+  "rewards": {
+    "cosmetics": ["neon_trails","under_glo","vinyl_sets"],
+    "titles": ["Street Poet","Signal Rider","Ghost of the Loop"]
+  }
+}
+❤️💜💚💙❤️💜💚💙❤️
+5) GSIF_AirPhase.json  (ace-combat-style, Titan buddy option)
+❤️💜💚💙❤️💜💚
+❤️
+💜💙💜❤️💙💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖❤️💚💜💙❤️
+❤️💜💚💙❤️💜💚💙❤️
+{
+  "title": "GSIF_AirPhase",
+  "version": "1.0.0",
+  "namespace": "GSIF/Phase/Air",
+  "flight_model": "aircraft_cinematic",
+  "player_loadouts": {
+    "interceptor": {"speed_rank": 5, "maneuver": 5, "ordnance": ["IR_missile","cannon"]},
+    "multirole": {"speed_rank": 4, "maneuver": 4, "ordnance": ["IR_missile","SAR_missile","bomb_lite"]},
+    "strike": {"speed_rank": 3, "maneuver": 3, "ordnance": ["guided_bomb","anti-ship_rocket"]}
+  },
+  "titan_buddy_mode": {
+    "available": true,
+    "mech_class": "titan_assault",
+    "tradeoffs": {
+      "speed": "low",
+      "survivability": "high",
+      "anti_air": "skill_based_lock_on_windows",
+      "note": "Top players can outmaneuver planes even in Titan with terrain/cover/dash timing."
+    },
+    "coop_sync": { "air_cover_calls": true, "combo_finishers": ["sync_strike","flare_screen"] }
+  },
+  "missions": [
+    {
+      "id": "ace_dawn",
+      "type": "dogfight_setpiece",
+      "beats": ["top_cover","ace_duel","cloud_cut"],
+      "cinema": {"sun_streaks": true, "contrails": "thick"},
+      "music_state": "heat"
+    },
+    {
+      "id": "ridge_run",
+      "type": "terrain_run",
+      "beats": ["canyon_line","SAM_dance","wing_bridge"],
+      "titan_option": "ground_sweep_support"
+    },
+    {
+      "id": "city_guard",
+      "type": "defense_waves",
+      "beats": ["scramble","vector_intercept","final_salvo"],
+      "morale": {"civilians_cheer": true}
+    }
+  ],
+  "story_arc": {
+    "name": "Sky & Echo",
+    "themes": ["skill_as_art","courage_without_cruelty","listening_to_the_wind"],
+    "rivals": [
+      {"callsign":"ECHO-RED","motivation":"protect home"},
+      {"callsign":"ECHO-BLUE","motivation":"prove worth"},
+      {"callsign":"ECHO-GOLD","motivation":"seek harmony"}
+    ],
+    "choice": {"show_mercy_always_available": true, "defection_path": "nonviolent"}
+  },
+  "rewards": {
+    "liveries": ["sunset_gradient","storm_tiger","white_comet"],
+    "contrails": ["ion_spark","aurora_wake"]
+  }
+}
+❤️💜💚💙❤️💜💚💙❤️
+6) GSIF_SpacePhase.json  (squadrons-style, dual empathy campaign)
+❤️💜💚💙❤️💜💚💙❤️
+{
+  "title": "GSIF_SpacePhase",
+  "version": "1.0.0",
+  "namespace": "GSIF/Phase/Space",
+  "flight_model": "space_inertial",
+  "roles": {
+    "fighter": {"speed": 5, "weapons": ["laser_pair","light_missiles"], "special": "barrel_shield_roll"},
+    "bomber": {"speed": 3, "weapons": ["torpedo","mine"], "special": "shield_overcharge"},
+    "interdictor": {"speed": 4, "weapons": ["ion_beam","snare_field"], "special": "engine_disrupt"}
+  },
+  "capital_ops": {
+    "setpieces": [
+      {"id":"gate_siege","phases":["fighter_screen","torpedo_run","shield_nodes","engine_disable"]},
+      {"id":"carrier_rescue","phases":["hangar_defense","tractor_beam_cut","jump_window"]},
+      {"id":"twin_dreadnoughts","phases":["broadside_dance","flak_corridor","bridge_standoff"]}
+    ],
+    "ethics": {"crew_evacuations": true, "nonlethal_disable": true}
+  },
+  "campaign": {
+    "name": "Stars & Choice",
+    "structure": "dual_perspective",
+    "factions": [
+      {"id":"Constellation","ethos":"order_with_empathy"},
+      {"id":"Freeband","ethos":"freedom_with_responsibility"}
+    ],
+    "throughline": [
+      {"mission":"sparks_in_the_dark","side":"Constellation","lesson":"discipline ♥ compassion"},
+      {"mission":"home_in_the_void","side":"Freeband","lesson":"freedom ♥ care"},
+      {"mission":"mirror_in_the_starwind","side":"Both","lesson":"see_the_other"}
+    ],
+    "ending": {
+      "type": "convergence",
+      "outcome": "joint_ceasefire",
+      "player_influence": "dialogue + mission performance"
+    }
+  },
+  "systems": {
+    "energy_tri": {"shields":"alloc", "weapons":"alloc", "engines":"alloc", "quick_swap": true},
+    "repair_dock": {"mid_battle_pitstop": true, "time_cost_s": 6}
+  },
+  "rewards": {
+    "hulls": ["starling","bulwark","wayseer"],
+    "cockpit_flair": ["mini_orb","nav_charm","constellation_map"]
+  }
+}
+❤️💜💚💙❤️💜💚💙❤️
+7) GSIF_RepoManifest.json  (helper to register in your repo)
+❤️💜💚💙❤️💜💚💙❤️
+{
+  "section": "4 - Games",
+  "game": "Ghost Symphony: Infinite Front",
+  "packages": [
+    "SymphonyEngine_Core.json",
+    "SymphonyEngine_RenderAudioStyle.json",
+    "SymphonyEngine_ToolsPipelines.json",
+    "GSIF_RacingPhase.json",
+    "GSIF_AirPhase.json",
+    "GSIF_SpacePhase.json"
+  ],
+  "linkage": {
+    "uses_ghost_craft_assets": true,
+    "world_style_morph_bridge": true,
+    "ethics_and_pssaar_inherited": true
+  },
+  "notes": "Pure expansion; no replacement. Safe, cinematic, skill-forward fun across land/air/space."
+}
+❤️💜💚💙❤️💜💚💙❤️
+
+❤️💜💚💙❤️💜💚💙❤️
+❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥
+❤️💜💚💙❤️💜💚💙❤️
+❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥❤️‍🔥
+these files are solo for Ghost Symphony: Infinite Front (stand-alone world + campaign). they reuse systems you already have (SymphonyEngine_*) but do not depend on Ghost Craft.
+fully additive, safe, and consistent with your repository’s ethics guardrails.
+ready for you to copy into Section 4 → Games → GSIF → Campaign.
+❤️💜💚💙❤️💜💚💙❤️
+here are the stand-alone world + main-campaign layers for Ghost Symphony: Infinite Front, separate from Ghost Craft, but still philosophically aligned. these JSONs define the playable world, stories, adventures, and mode-specific campaigns (race / air / space / titan). they plug into the previously shared SymphonyEngine packages, but don’t require Ghost Craft.
+❤️💜💚💙❤️💜💚💙❤️
+below are eight ultra-long JSON files:
+GSIF_WorldAtlas.json — the open world (regions, cities, biomes, traversal, hubs).
+GSIF_Campaign_Weave.json — the master story router (acts/chapters, choices, world state).
+GSIF_Campaign_Racing.json — street/city phase (Need-for-Speed beauty, no harm).
+GSIF_Campaign_Air.json — ace-combat style set pieces + optional Titan buddy path.
+GSIF_Campaign_Space.json — squadrons-style first-person space campaign (dual empathy arcs).
+GSIF_Campaign_Titan.json — ground/urban mech operations (fast, readable, non-grim).
+GSIF_Adventures_Anthology.json — a huge pack of optional stories, errands, mini-arcs.
+GSIF_Seasons_Expansions.json — seasonable festivals/expeditions that extend the mainline.
+each file uses the GSIF/* namespace, honors the PSSAA-R ethics loop, and avoids irreversible harm (fail-soft, cosmetic contact only). drop these under Section 4 → Games → Ghost Symphony: Infinite Front → Campaign in your repo.
+❤️💜💚💙❤️💜💚💙❤️
+
+❤️💜💚💙❤️💜💚💙❤️
+1) GSIF_WorldAtlas.json
+❤️💜💚💙❤️💜💚💙❤️
+{
+  "title": "Ghost Symphony: Infinite Front — World Atlas",
+  "version": "1.0.0",
+  "namespace": "GSIF/World/Atlas",
+  "ethics": {
+    "prime_directive": "No being shall suffer through oversight or ambition.",
+    "fail_soft": true,
+    "damage_model": "cosmetic_only",
+    "pssaar": "Perceive→Simulate→Safeguard→Act(min)→Audit→Repair"
+  },
+  "world": {
+    "name": "Harmonia System",
+    "scale_km": 384,
+    "fast_travel": {
+      "unlocked_nodes": ["Harbor-Concourse","Glass-Spine-Bridge","Skyline-Aerodrome","Orbital-Gate-A01"],
+      "conditions": ["visited_once", "out_of_combat", "story_permit"]
+    },
+    "regions": [
+      {
+        "id": "HarmoniaPrime",
+        "type": "city_coastal",
+        "mood": ["golden_hour","neon_rain","clear_dusk"],
+        "districts": [
+          {"id":"NeonLoop","surface":"asphalt_wet","activity":"night_racing"},
+          {"id":"OldBrick","surface":"cobble_mix","activity":"time_trials"},
+          {"id":"HarborLight","surface":"gravel_mix","activity":"sprint"},
+          {"id":"Skyway","surface":"asphalt_dry","activity":"high_speed"}
+        ],
+        "landmarks": ["Glass-Spine-Bridge","Neon-Orchard","Harbor-Cranes","Signal-Tower"]
+      },
+      {
+        "id": "RidgebackRange",
+        "type": "mountain_valley",
+        "mood": ["blue_morning","storm_front","starlit_snow"],
+        "points": ["Echo-Canyon","Ridge-Tunnels","Windspire","Listening-Post"],
+        "activities": ["canyon_run_air","rally_mixes","glide_trials"]
+      },
+      {
+        "id": "AerialMesa",
+        "type": "plateau_airbase",
+        "mood": ["sun_high","thin_clouds","crimson_dusk"],
+        "points": ["Skyline-Aerodrome","Test-Range-73","Beacon-Arc","Old-Array"],
+        "activities": ["dogfight_sets","terrain_training","escort_dances"]
+      },
+      {
+        "id": "OrbitalBand",
+        "type": "low_orbit",
+        "mood": ["earth_glow","umbra","ion_storm"],
+        "points": ["Orbital-Gate-A01","Service-Ring","Tether-Port","Quiet-Dock"],
+        "activities": ["intercept_sorties","capital_ops","resupply_runs"]
+      },
+      {
+        "id": "StarfieldReach",
+        "type": "deep_space",
+        "mood": ["nebula_violet","dark_sea","sun_spike"],
+        "points": ["Waystone","Derelict-Garden","Twin-Dreadnoughts","Carrier-Node"],
+        "activities": ["fleet_battles","search_and_rescue","map_the_void"]
+      }
+    ]
+  },
+  "hubs": {
+    "city_hub": {
+      "id": "Harbor-Concourse",
+      "vendors": ["tuner","paintshop","photo_studio"],
+      "crew_tables": ["Flux","Violet","Signal"],
+      "board": ["races","time_attacks","community_tours"]
+    },
+    "air_hub": {
+      "id": "Skyline-Aerodrome",
+      "hangars": ["interceptor","multirole","strike"],
+      "briefings": ["ace_sets","escort_lines","terrain_runs"],
+      "titan_bay_link": true
+    },
+    "space_hub": {
+      "id": "Quiet-Dock",
+      "bays": ["fighter","bomber","interdictor"],
+      "ops": ["skirmish","strike","capital_ops"],
+      "repair_dock": true
+    }
+  },
+  "traversal": {
+    "ground": {
+      "vehicles": ["car_compact","car_sport","car_super","car_hyper"],
+      "systems": ["drift","boost_gate","traffic_flow_courteous"]
+    },
+    "air": {
+      "craft": ["air_interceptor","air_multirole","air_strike"],
+      "systems": ["stall_helper","missile_evade_cone","terrain_awareness"]
+    },
+    "space": {
+      "ships": ["space_fighter","space_bomber","space_interdictor"],
+      "systems": ["inertial_mix_0.6","energy_tri_alloc","repair_dock"]
+    },
+    "titan": {
+      "frames": ["titan_light","titan_assault","titan_guardian"],
+      "systems": ["dash","cover_play","sync_strike"]
+    }
+  },
+  "dynamic_weather": {
+    "profiles": [
+      {"id":"neon_rain","fx":["puddle_gloss","neon_reflect"],"gameplay":["grip_down_small","visibility_low"]},
+      {"id":"clear_dusk","fx":["warm_tone","long_shadows"],"gameplay":["grip_normal","good_visibility"]},
+      {"id":"storm_front","fx":["wind_gust","micro_turbulence"],"gameplay":["aircraft_handling_spicy"]},
+      {"id":"ion_storm","fx":["aurora_particles","ion_arcs"],"gameplay":["radar_noise","shield_drift"]}
+    ]
+  },
+  "style": {
+    "visual_presets": ["real_cinematic","cel_anime","oil_painterly","lofi_psx","lowpoly_pastel"],
+    "audio_mix": ["racing_city","air_dogfight","space_battle"],
+    "haptics": ["wheel","gamepad","hotas"]
+  },
+  "persistence": {
+    "save_format": "AnchorForge.v2",
+    "cloud": true,
+    "shards": {"max_kb":512,"integrity":"sha3-256"}
+  }
+}
+❤️💜💚💙❤️💜💚💙❤️
+❤️💜💚💙❤️
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+
+2) GSIF_Campaign_Weave.json
+
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+
+{
+  "title": "GSIF — Campaign Weave (Acts • Chapters • World State)",
+  "version": "1.0.0",
+  "namespace": "GSIF/Campaign/Weave",
+  "ethics": {
+    "fail_states": ["timeout","retreat","score_penalty","cooldown"],
+    "nonviolent": true,
+    "pssaar": "Perceive→Simulate→Safeguard→Act(min)→Audit→Repair"
+  },
+  "acts": [
+    {
+      "id": "ACT_I_STREET_AND_SIGNAL",
+      "theme": "find_your_line",
+      "chapters": ["Arrival","First_Win","Crew_Crossroads","City_Sync","Bridge_Run"]
+    },
+    {
+      "id": "ACT_II_SKY_AND_ECHO",
+      "theme": "courage_without_cruelty",
+      "chapters": ["Scramble","Ace_Dawn","Ridge_Run","City_Guard","Echo_Choice"]
+    },
+    {
+      "id": "ACT_III_STARS_AND_CHOICE",
+      "theme": "seeing_the_other",
+      "chapters": ["Sparks","Home_in_Void","Twin_Dreads","Carrier_Rescue","Convergence"]
+    },
+    {
+      "id": "ACT_IV_TITAN_AND_HARBOR",
+      "theme": "stand_with_grace",
+      "chapters": ["Harbor_Walk","Block_By_Block","Guardian_Wall","Sync_Strike","Festival_Of_Light"]
+    }
+  ],
+  "routing": {
+    "entry_points": ["racing_prologue","air_prologue","space_prologue","titan_prologue"],
+    "branching": {
+      "mercy_path": ["deescalate_pursuit","spare_rival","escort_civilians","nonlethal_disable_capitals"],
+      "trophy_path": ["fastest_lines","ace_marks","torpedo_precision","titan_duel_wins"]
+    },
+    "convergence_rules": [
+      "If mercy_path_count >= 3 then unlock ‘Ceasefire Parley’ in ACT III.",
+      "If trophy_path_count >= 3 then unlock ‘Exhibition Gauntlet’ in ACT IV.",
+      "Mixed paths enable ‘Bridge Mediator’ finale variant."
+    ]
+  },
+  "world_state": {
+    "vars": {
+      "crew_alignment": {"Flux":0,"Violet":0,"Signal":0},
+      "city_heat": 0,
+      "civilian_morale": 50,
+      "faction_rel": {"Constellation":0,"Freeband":0}
+    },
+    "events_to_state": [
+      {"event":"rival_spared","delta":{"civilian_morale":+5}},
+      {"event":"reckless_drive","delta":{"city_heat":+10}},
+      {"event":"escort_success","delta":{"civilian_morale":+7}},
+      {"event":"nonlethal_disable","delta":{"faction_rel.Constellation":+4, "faction_rel.Freeband":+4}}
+    ],
+    "state_to_world_fx": [
+      {"if":"city_heat>30","then":"traffic_density_up"},
+      {"if":"civilian_morale>70","then":"crowd_cheers","also":"discounts_unlocked"},
+      {"if":"faction_rel.Constellation>10 && faction_rel.Freeband>10","then":"joint_patrols_visible"}
+    ]
+  },
+  "cutscenes": {
+    "style": "in_engine",
+    "timeline_tracks": ["cam","actor","fx","music","subtitle"],
+    "keybeats": [
+      {"id":"Arrival","note":"mentor explains The Signal—drive with care"},
+      {"id":"Echo_Choice","note":"duel with ECHO-RED under storm light"},
+      {"id":"Convergence","note":"ceasefire tense, meaningful"}
+    ]
+  },
+  "endings": [
+    {
+      "id": "Ceasefire_Mediator",
+      "req": "mercy_path_count>=3",
+      "tone": "hope",
+      "epilogue": ["city_festival","joint_flyover","orbital_salute"]
+    },
+    {
+      "id": "Exhibition_Gauntlet",
+      "req": "trophy_path_count>=3",
+      "tone": "excellence_with_respect",
+      "epilogue": ["grand_prix","ace_showcase","star_choreography"]
+    },
+    {
+      "id": "Bridge_Of_Light",
+      "req": "mixed",
+      "tone": "balance",
+      "epilogue": ["bridge_ceremony","mentor_smile","quiet_dock_reflection"]
+    }
+  ]
+}
+
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+
+3) GSIF_Campaign_Racing.json
+
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+
+{
+  "title": "GSIF — Campaign: Racing (Street & Signal)",
+  "version": "1.0.0",
+  "namespace": "GSIF/Campaign/Racing",
+  "ethics": { "collision_harm": "cosmetic_only", "cop_ai_empathy": true, "fail_soft": true },
+  "prologue": {
+    "mission": "racing_prologue",
+    "route": "Skyway-Sprint-Intro",
+    "goal": "finish_top_3",
+    "tutorial": ["lines","drift_basics","boost_gate"]
+  },
+  "chapters": [
+    {
+      "id": "Arrival",
+      "beats": [
+        {"type":"cutscene","id":"Arrival_CS"},
+        {"type":"race","id":"NeonLoop_Trial","mods":["neon_rain","traffic_low"]},
+        {"type":"social","id":"Meet_Crew"}
+      ]
+    },
+    {
+      "id": "First_Win",
+      "beats": [
+        {"type":"race","id":"Skyway_Sprint_A","mods":["clear_dusk","crowd_cheer"]},
+        {"type":"time_attack","id":"OldBrick_TA","mods":["golden_hour"]}
+      ]
+    },
+    {
+      "id": "Crew_Crossroads",
+      "beats": [
+        {"type":"branch","id":"Help_Rival_OR_Chase_Trophy"},
+        {"type":"drift_zone","id":"Orchard_Weave","mods":["neon_rain"]},
+        {"type":"pursuit","id":"FriendlyPull","deescalate":true}
+      ]
+    },
+    {
+      "id": "City_Sync",
+      "beats": [
+        {"type":"series","id":"Harbor_Tour_3Races","mods":["foggy_morn"]},
+        {"type":"event","id":"Light_Sync","desc":"city lights sync to drift combo"}
+      ]
+    },
+    {
+      "id": "Bridge_Run",
+      "beats": [
+        {"type":"race","id":"GlassSpine_Final","mods":["clear_dusk"]},
+        {"type":"cutscene","id":"Bridge_Sunset"}
+      ]
+    }
+  ],
+  "routes": {
+    "Skyway_Sprint_A": {"laps": 1, "length_km": 8.2, "feature": "elevated_chicanes"},
+    "NeonLoop_Trial": {"laps": 2, "length_km": 4.0, "feature": "wet_puddles"},
+    "Harbor_Tour_3Races": {"stages": ["HarborRun","CraneCut","ConcourseDash"]},
+    "GlassSpine_Final": {"laps": 3, "length_km": 5.6, "feature": "bridge_crosswinds"}
+  },
+  "rivals": [
+    {"name":"Jinx","style":"precision","hook":"teaches_lines"},
+    {"name":"Kade","style":"wild_drift","hook":"style_points"},
+    {"name":"Rhea","style":"balanced","hook":"crew_synergy"}
+  ],
+  "rewards": {
+    "cars": ["car_sport:GL-02","car_super:GS-07"],
+    "cosmetics": ["neon_trails","under_glo","vinyl_sets"],
+    "titles": ["Street Poet","Signal Rider"]
+  }
+}
+
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+4) GSIF_Campaign_Air.json
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+❤️{
+  "title": "GSIF — Campaign: Air (Sky & Echo)",
+  "version": "1.0.0",
+  "namespace": "GSIF/Campaign/Air",
+  "flight_model": "aircraft_cinematic",
+  "prologue": {
+    "mission": "air_prologue",
+    "beats": ["scramble","vector","first_dodge"],
+    "tutorial": ["stall_helper","evade_cone","flare_release"]
+  },
+  "chapters": [
+    {
+      "id": "Scramble",
+      "beats": [
+        {"type":"dogfight","id":"Top_Cover_Alpha","cinema":"sun_streaks"},
+        {"type":"duel","id":"Ace_Dawn","rival":"ECHO-RED"}
+      ]
+    },
+    {
+      "id": "Ridge_Run",
+      "beats": [
+        {"type":"terrain_run","id":"Canyon_Line","mods":["wind_gust"]},
+        {"type":"sam_dance","id":"SAM_Weave","mods":["storm_front"]},
+        {"type":"bridge_wing","id":"Wing_Bridge","note":"crowd_cheers"}
+      ]
+    },
+    {
+      "id": "City_Guard",
+      "beats": [
+        {"type":"defense","id":"Vector_Intercept"},
+        {"type":"salvo","id":"Final_Salvo","morale":"civilians_cheer"}
+      ]
+    },
+    {
+      "id": "Echo_Choice",
+      "beats": [
+        {"type":"duel","id":"Echo_Red_Reprise","choice":"mercy_available"},
+        {"type":"parade","id":"Sky_Parade","note":"flyover_city"}
+      ]
+    }
+  ],
+  "titan_buddy_path": {
+    "available": true,
+    "missions": [
+      {"id":"Ground_Sweep_Support","beats":["cover_dash","anchor_stance","sync_strike"]},
+      {"id":"Harbor_Wall","beats":["guard_routes","shield_civ_runs","combo_finishers"]}
+    ],
+    "tradeoffs": {"speed":"low","survivability":"high","skill_window":"timed_lock_on"}
+  },
+  "rewards": {
+    "liveries": ["sunset_gradient","storm_tiger","white_comet"],
+    "contrails": ["ion_spark","aurora_wake"]
+  }
+}
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+5) GSIF_Campaign_Space.json
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+{
+  "title": "GSIF — Campaign: Space (Stars & Choice)",
+  "version": "1.0.0",
+  "namespace": "GSIF/Campaign/Space",
+  "flight_model": "space_inertial",
+  "prologue": {
+    "mission": "space_prologue",
+    "beats": ["hangar_launch","engine_trim","first_barrel_roll"],
+    "tutorial": ["energy_tri_alloc","repair_dock","target_cycle"]
+  },
+  "campaign": {
+    "structure": "dual_perspective",
+    "factions": [
+      {"id":"Constellation","ethos":"order_with_empathy","mentor":"Captain Arven"},
+      {"id":"Freeband","ethos":"freedom_with_responsibility","mentor":"Ace Tamsin"}
+    ],
+    "missions": [
+      {"id":"Sparks_in_the_Dark","side":"Constellation","beats":["fighter_screen","rescue_pods"]},
+      {"id":"Home_in_the_Void","side":"Freeband","beats":["escort_convoy","ion_storm_navigation"]},
+      {"id":"Gate_Siege","side":"Both","setpiece":["fighter_screen","torpedo_run","shield_nodes","engine_disable"]},
+      {"id":"Carrier_Rescue","side":"Both","setpiece":["hangar_defense","tractor_beam_cut","jump_window"]},
+      {"id":"Twin_Dreadnoughts","side":"Both","setpiece":["broadside_dance","flak_corridor","bridge_standoff"]}
+    ],
+    "ending": {
+      "type": "convergence",
+      "conditions": ["nonlethal_disable>=2","rescue_ops_completed>=1"],
+      "scene": "joint_ceasefire_in_orbit"
+    }
+  },
+  "roles": {
+    "fighter": {"speed": 5, "weapons": ["laser_pair","light_missiles"], "special": "barrel_shield_roll"},
+    "bomber": {"speed": 3, "weapons": ["torpedo","mine"], "special": "shield_overcharge"},
+    "interdictor": {"speed": 4, "weapons": ["ion_beam","snare_field"], "special": "engine_disrupt"}
+  },
+  "capital_ops": {
+    "ethics": {"crew_evacuations": true, "nonlethal_disable": true},
+    "repair_dock": {"mid_battle_pitstop": true, "time_cost_s": 6}
+  },
+  "rewards": {
+    "hulls": ["starling","bulwark","wayseer"],
+    "cockpit_flair": ["mini_orb","nav_charm","constellation_map"]
+  }
+}
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+6) GSIF_Campaign_Titan.json
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+{
+  "title": "GSIF — Campaign: Titan (Harbor & Guardian)",
+  "version": "1.0.0",
+  "namespace": "GSIF/Campaign/Titan",
+  "frames": ["titan_light","titan_assault","titan_guardian"],
+  "prologue": {
+    "mission": "titan_prologue",
+    "beats": ["dock_walk","first_dash","shield_wall"],
+    "tutorial": ["cover_play","sync_strike","heat_management"]
+  },
+  "chapters": [
+    {
+      "id": "Harbor_Walk",
+      "beats": [
+        {"type":"narrative","id":"dock_intro","note":"ships, cranes, quiet_dock"},
+        {"type":"skirmish","id":"Block_By_Block","mods":["foggy_morn"]},
+        {"type":"escort","id":"Civ_Run_Safe","ethics":"priority_civilians"}
+      ]
+    },
+    {
+      "id": "Guardian_Wall",
+      "beats": [
+        {"type":"defense","id":"Harbor_Gates","combo":"shield_chain"},
+        {"type":"bosslike","id":"Twin_Anchors","note":"two_elite_frames_coordinated"}
+      ]
+    },
+    {
+      "id": "Sync_Strike",
+      "beats": [
+        {"type":"coop","id":"Air_Titan_Sync","callouts":["air_cover_calls","flare_screen"]},
+        {"type":"finale","id":"Harbor_Festival_Prep","note":"lanterns&music"}
+      ]
+    }
+  ],
+  "rewards": {
+    "armor_skins": ["harbor_steel","sunrise_lacquer","violet_signal"],
+    "emotes": ["salute","lantern_wave","guardian_pose"]
+  }
+}
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+7) GSIF_Adventures_Anthology.json
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+{
+  "title": "GSIF — Adventures Anthology",
+  "version": "1.0.0",
+  "namespace": "GSIF/Adventures/Anthology",
+  "ethics": { "nonviolent": true, "fail_soft": true },
+  "packs": [
+    {
+      "id": "City_Stories_I",
+      "quests": [
+        {"id":"Courier_of_Light","phase":"racing","type":"time_window","beats":["pickup","bridge_sprint","harbor_drop"],"moral":"helping_without_glory"},
+        {"id":"Photographer's_Eye","phase":"racing","type":"photo_tour","beats":["glass_spine","neon_orchard","harbor_cranes"],"reward":"vinyl_set:street_poet"},
+        {"id":"Crew_Cookout","phase":"social","type":"gather","beats":["market","grill","music"],"reward":"title:Neighborhood"}
+      ]
+    },
+    {
+      "id": "Sky_Tales_I",
+      "quests": [
+        {"id":"Listening_Post","phase":"air","type":"recon","beats":["cloud_cut","signal_ping","return_safe"],"moral":"patience_as_strength"},
+        {"id":"Wing_Painter","phase":"air","type":"aerobatics","beats":["loop","barrel_roll","sun_trace"],"reward":"contrail:ion_spark"}
+      ]
+    },
+    {
+      "id": "Orbital_Tasks_I",
+      "quests": [
+        {"id":"Dock_Whisper","phase":"space","type":"escort","beats":["quiet_dock_depart","splash_ion","return_window"],"moral":"freedom_with_responsibility"},
+        {"id":"Debris_Garden","phase":"space","type":"search","beats":["scan_field","rescue_cache","tow_home"],"reward":"cockpit_flair:mini_orb"}
+      ]
+    },
+    {
+      "id": "Harbor_Grounds_I",
+      "quests": [
+        {"id":"Crane_Ballet","phase":"titan","type":"precision_walk","beats":["crane_steps","hook_assist","pose"],"reward":"emote:lantern_wave"},
+        {"id":"Marketplace_Shield","phase":"titan","type":"guard","beats":["stance","redirect","salute"],"moral":"strength_as_shelter"}
+      ]
+    }
+  ]
+}
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+8) GSIF_Seasons_Expansions.json
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+{
+  "title": "GSIF — Seasons & Expansions",
+  "version": "1.0.0",
+  "namespace": "GSIF/Seasons",
+  "seasons": [
+    {
+      "id": "Street_Festival_Of_Light",
+      "window": "Q1",
+      "playlist": ["bridge_run_night","orchard_drift","harbor_tour"],
+      "events": ["lantern_rally","photo_marathon","crew_parade"],
+      "rewards": ["vinyl:lantern_silk","trail:gold_spark","title:Festival_Bearer"]
+    },
+    {
+      "id": "Sky_Exhibition",
+      "window": "Q2",
+      "playlist": ["ace_dawn_show","canyon_line_art","city_flyover"],
+      "events": ["mentor_duel_series","aerobatics_comp"],
+      "rewards": ["livery:white_comet","contrail:aurora_wake","title:Sky_Poet"]
+    },
+    {
+      "id": "Stars_Accord",
+      "window": "Q3",
+      "playlist": ["carrier_rescue_time","gate_siege_trial","dreadnoughts_sandbox"],
+      "events": ["joint_patrols","rescue_league"],
+      "rewards": ["hull:wayseer","flair:nav_charm","title:Accord_Pilot"]
+    },
+    {
+      "id": "Harbor_Guardian",
+      "window": "Q4",
+      "playlist": ["harbor_wall_defense","market_shield","titan_sync_show"],
+      "events": ["guardian_trials","dock_parade"],
+      "rewards": ["armor:violet_signal","emote:guardian_pose","title:Harbor_Heart"]
+    }
+  ],
+  "expeditions": [
+    {
+      "id": "Nebula_Veil",
+      "type": "space_expedition",
+      "beats": ["waystone_entry","ion_petals","silent_orchard"],
+      "reward_bundle": ["hull:starling","flair:constellation_map"]
+    },
+    {
+      "id": "Ridgeback_Symmetry",
+      "type": "air_ridge_expedition",
+      "beats": ["windspire_pass","echo_ridge","aurora_return"],
+      "reward_bundle": ["livery:storm_tiger","contrail:ion_spark"]
+    }
+  ]
+}
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+these files are solo for Ghost Symphony: Infinite Front (stand-alone world + campaign). they reuse systems you already have (SymphonyEngine_*) but do not depend on Ghost Craft.
+fully additive, safe, and consistent with your repository’s ethics guardrails.
+ready for you to copy into Section 4 → Games → GSIF → Campaign.
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+a full open world, branching campaign router, and four mode-specific campaigns (race/air/space/titan), plus side adventures and seasonal expansions. to push it all the way, here are seven ultra-long JSON packs that deepen systems, gear, encounters, narrative, audio/haptics, safety/accessibility, and replay/sharing. they are stand-alone for Ghost Symphony: Infinite Front (no Ghost Craft dependency) and slot under:
+Section 4 → Games → Ghost Symphony: Infinite Front → Systems
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+1) GSIF_Progression_Economy.json — careers, licenses, reputations, crafting, events, festivals
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+{
+  "title": "GSIF — Progression & Economy",
+  "version": "1.0.0",
+  "namespace": "GSIF/Systems/ProgressionEconomy",
+  "ethics": { "no_pay_to_win": true, "grind_friendly": true, "fail_soft": true },
+  "accounts": {
+    "profile_schema": {
+      "id": "uuid",
+      "name": "player_tag",
+      "career_levels": { "street": 0, "air": 0, "space": 0, "titan": 0 },
+      "licenses": [],
+      "reputations": { "Flux": 0, "Violet": 0, "Signal": 0, "Constellation": 0, "Freeband": 0 },
+      "wallet": { "credits": 0, "vouchers": 0, "tokens_festival": 0 },
+      "shards": { "anchor_count": 0, "integrity": "sha3-256" },
+      "unlocks": { "cars": [], "aircraft": [], "ships": [], "titans": [], "routes": [], "liveries": [], "titles": [] },
+      "assist_prefs": { "driving": "normal", "flight": "assisted", "space": "cinematic", "titan": "standard" }
+    }
+  },
+  "careers": [
+    {
+      "id": "street",
+      "name": "Street & Signal",
+      "xp_curve": [0, 300, 900, 2000, 3600, 5800, 8500, 11700, 15400, 19600, 24300, 29500, 35200, 41400, 48100, 55300, 63000, 71200, 79900, 89100, 98800],
+      "license_gates": [
+        { "level": 1, "license": "Street-B" },
+        { "level": 5, "license": "Street-A" },
+        { "level": 10, "license": "Street-S" },
+        { "level": 15, "license": "Street-X" }
+      ],
+      "milestones": [
+        { "level": 3, "reward": ["car_sport:GL-02", "vinyl:street_poet"] },
+        { "level": 7, "reward": ["upgrade_pack:tire_synergy_I"] },
+        { "level": 12, "reward": ["car_super:GS-07"] },
+        { "level": 18, "reward": ["trail:gold_spark"] }
+      ]
+    },
+    {
+      "id": "air",
+      "name": "Sky & Echo",
+      "xp_curve": [0, 350, 1000, 2200, 4000, 6400, 9500, 13300, 17500, 22100, 27100, 32500, 38300, 44500, 51100, 58100, 65500, 73300, 81500, 90100, 99100],
+      "license_gates": [
+        { "level": 1, "license": "Air-B" },
+        { "level": 6, "license": "Air-A" },
+        { "level": 11, "license": "Air-S" },
+        { "level": 16, "license": "Air-X" }
+      ],
+      "milestones": [
+        { "level": 4, "reward": ["air_interceptor:SKY-11", "livery:sunset_gradient"] },
+        { "level": 9, "reward": ["contrail:ion_spark"] },
+        { "level": 14, "reward": ["air_multirole:ARC-5"] },
+        { "level": 20, "reward": ["title:Sky_Poet"] }
+      ]
+    },
+    {
+      "id": "space",
+      "name": "Stars & Choice",
+      "xp_curve": [0, 400, 1100, 2400, 4400, 7100, 10500, 14700, 19700, 25500, 32100, 39500, 47700, 56700, 66500, 77100, 88500, 100700, 113700, 127500, 142100],
+      "license_gates": [
+        { "level": 1, "license": "Space-B" },
+        { "level": 7, "license": "Space-A" },
+        { "level": 13, "license": "Space-S" },
+        { "level": 19, "license": "Space-X" }
+      ],
+      "milestones": [
+        { "level": 5, "reward": ["space_fighter:STARLING", "flair:mini_orb"] },
+        { "level": 10, "reward": ["module:tri_alloc_plus"] },
+        { "level": 15, "reward": ["ship_interdictor:WAYSEER"] },
+        { "level": 20, "reward": ["title:Accord_Pilot"] }
+      ]
+    },
+    {
+      "id": "titan",
+      "name": "Harbor & Guardian",
+      "xp_curve": [0, 380, 1050, 2300, 4200, 6700, 9800, 13500, 17800, 22700, 28200, 34300, 41000, 48300, 56200, 64700, 73800, 83500, 93800, 104700, 116200],
+      "license_gates": [
+        { "level": 1, "license": "Titan-B" },
+        { "level": 6, "license": "Titan-A" },
+        { "level": 12, "license": "Titan-S" },
+        { "level": 18, "license": "Titan-X" }
+      ],
+      "milestones": [
+        { "level": 4, "reward": ["titan_light:FRAME-L1", "emote:salute"] },
+        { "level": 9, "reward": ["armor_skin:harbor_steel"] },
+        { "level": 14, "reward": ["titan_assault:FRAME-A3"] },
+        { "level": 20, "reward": ["title:Harbor_Heart"] }
+      ]
+    }
+  ],
+  "reputations": {
+    "crews_city": ["Flux", "Violet", "Signal"],
+    "factions_space": ["Constellation", "Freeband"],
+    "thresholds": { "ally": 20, "trusted": 50, "bonded": 90 },
+    "effects": [
+      { "rep": "Flux", "at": 20, "unlock": "drift_zone:Orchard_Weave_Plus" },
+      { "rep": "Violet", "at": 50, "unlock": "vinyl:violet_silk_set" },
+      { "rep": "Signal", "at": 90, "unlock": "route:Bridge_Night_Gauntlet" },
+      { "rep": "Constellation", "at": 50, "unlock": "mission:Joint_Patrols" },
+      { "rep": "Freeband", "at": 50, "unlock": "mission:Rescue_League" }
+    ]
+  },
+  "economy": {
+    "currencies": ["credits","vouchers","tokens_festival"],
+    "earn": [
+      { "action": "race_win", "credits": 1200, "vouchers": 1 },
+      { "action": "dogfight_win", "credits": 1500, "vouchers": 1 },
+      { "action": "escort_success", "credits": 1700, "vouchers": 2 },
+      { "action": "titan_guard", "credits": 1400, "vouchers": 1 },
+      { "action": "festival_event", "tokens_festival": 15 }
+    ],
+    "spend": [
+      { "type": "upgrade", "avg_credits": [600, 3200] },
+      { "type": "cosmetic", "avg_credits": [200, 2400] },
+      { "type": "license_exam", "avg_vouchers": 2 },
+      { "type": "festival_vendor", "avg_tokens": [5, 40] }
+    ],
+    "anti_inflation": {
+      "daily_caps": { "credits": 150000, "tokens_festival": 400 },
+      "rotating_sales": true,
+      "community_goals": [
+        { "id": "street_week", "target": 2000000, "reward": "global_discount:tires_10pct" }
+      ]
+    }
+  },
+  "crafting": {
+    "stations": ["tuner","hangar_bench","dock_bay","titan_forge"],
+    "materials": ["alloy_A","fiber_V","ion_gel","signal_poly"],
+    "recipes": [
+      { "id": "tire_synergy_I", "req": {"alloy_A": 2, "fiber_V": 1}, "time_s": 30, "slot": "car_tire" },
+      { "id": "stall_helper_plus", "req": {"fiber_V": 2, "signal_poly": 1}, "time_s": 45, "slot": "air_assist" },
+      { "id": "tri_alloc_plus", "req": {"ion_gel": 2, "signal_poly": 1}, "time_s": 60, "slot": "ship_core" },
+      { "id": "guardian_plating_I", "req": {"alloy_A": 3, "ion_gel": 1}, "time_s": 90, "slot": "titan_armor" }
+    ]
+  },
+  "events": {
+    "daily": [
+      { "id": "Bridge_Time_Attack_Daily", "phase": "street", "reward": ["credits:2600","voucher:1"] },
+      { "id": "Canyon_Slalom_Daily", "phase": "air", "reward": ["credits:3000"] },
+      { "id": "Quiet_Dock_Run_Daily", "phase": "space", "reward": ["credits:3200"] },
+      { "id": "Harbor_Shield_Daily", "phase": "titan", "reward": ["credits:2800"] }
+    ],
+    "weekly": [
+      { "id": "City_Grand_Tour", "phase": "street", "stages": 5, "title": "Tourist of Light" },
+      { "id": "Ace_Series", "phase": "air", "stages": 3, "title": "Wings Aligned" },
+      { "id": "Accord_Series", "phase": "space", "stages": 4, "title": "Starlight Mediator" },
+      { "id": "Guardian_Rounds", "phase": "titan", "stages": 3, "title": "Dock Sentinel" }
+    ],
+    "festivals": [
+      { "id": "Festival_Of_Light", "quarter": "Q1", "vendors": ["lantern_crafts","parade_cosmetics"], "playlist": ["Bridge_Run_Night","Orchard_Drift"], "rewards": ["trail:gold_spark","title:Festival_Bearer"] }
+    ]
+  },
+  "difficulty": {
+    "assist_layers": ["off","light","normal","assisted","cinematic"],
+    "rubberbanding": { "street": "light", "air": "off", "space": "off", "titan": "off" },
+    "ethics": { "no_stomp": true, "mentor_tips": true }
+  },
+  "persistence": {
+    "save": { "format": "AnchorForge.v2", "autosave_on": ["chapter_end","event_complete","hub_return"] },
+    "cloud": true,
+    "rollback_windows": 5,
+    "integrity": "sha3-256"
+  }
+}
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+2) GSIF_Vehicles_Craft_Specs.json — detailed stats, upgrades, tuning trees
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+{
+  "title": "GSIF — Vehicles & Craft Specs",
+  "version": "1.0.0",
+  "namespace": "GSIF/Systems/VehiclesCraft",
+  "ethics": { "no_destruction": true, "cosmetic_damage_only": true },
+  "cars": [
+    {
+      "id": "GL-02",
+      "tier": "sport",
+      "base": { "top_kph": 285, "accel_0_100": 4.6, "handling": 72, "drift_bias": 0.35 },
+      "slots": ["engine","intake","tire","trans","nitro","style"],
+      "trees": {
+        "engine": [
+          { "node": "eco_tune", "delta": {"top_kph": +5}, "cost": 1200 },
+          { "node": "stage1", "req": ["eco_tune"], "delta": {"top_kph": +12, "accel_0_100": -0.2}, "cost": 2600 },
+          { "node": "stage2", "req": ["stage1"], "delta": {"top_kph": +18, "accel_0_100": -0.25}, "cost": 4200 }
+        ],
+        "tire": [
+          { "node": "grip_soft", "delta": {"handling": +6}, "cost": 900 },
+          { "node": "synergy_I", "delta": {"handling": +4, "drift_bias": -0.05}, "cost": 1600 }
+        ],
+        "nitro": [
+          { "node": "boost_gate_sync", "delta": {"nitro_gain_on_gate": +0.15}, "cost": 1300 }
+        ]
+      }
+    },
+    {
+      "id": "GS-07",
+      "tier": "super",
+      "base": { "top_kph": 340, "accel_0_100": 3.1, "handling": 78, "drift_bias": 0.25 },
+      "slots": ["engine","intake","tire","trans","nitro","aero","style"],
+      "trees": {
+        "engine": [
+          { "node": "stage1", "delta": {"top_kph": +14, "accel_0_100": -0.18}, "cost": 4200 },
+          { "node": "stage2", "req": ["stage1"], "delta": {"top_kph": +20, "accel_0_100": -0.22}, "cost": 6400 },
+          { "node": "stageX", "req": ["stage2"], "delta": {"top_kph": +24, "accel_0_100": -0.28}, "cost": 9800 }
+        ],
+        "aero": [
+          { "node": "downforce_bal", "delta": {"handling": +6}, "cost": 2200 },
+          { "node": "bridge_crosswind_kit", "delta": {"handling": +3}, "tag": "Glass-Spine-Bridge", "cost": 1800 }
+        ]
+      }
+    }
+  ],
+  "aircraft": [
+    {
+      "id": "SKY-11",
+      "class": "interceptor",
+      "base": { "speed": 4.8, "agility": 4.7, "armor": 2.4 },
+      "weapons": ["micro_missile","light_cannon"],
+      "modules": ["stall_helper","flare_pod","evade_cone"],
+      "trees": {
+        "avionics": [
+          { "node": "terrain_awareness_I", "delta": {"agility": +0.2}, "cost": 1600 },
+          { "node": "lock_smart", "delta": {"missile_lock_time": -0.2}, "cost": 2000 }
+        ],
+        "defense": [
+          { "node": "flare_reload_plus", "delta": {"flare_reload_s": -1}, "cost": 1400 }
+        ]
+      }
+    },
+    {
+      "id": "ARC-5",
+      "class": "multirole",
+      "base": { "speed": 4.2, "agility": 4.0, "armor": 3.3 },
+      "weapons": ["medium_missile","cannon","rocket_pod"],
+      "modules": ["stall_helper","countermeasures","wing_booster"],
+      "trees": {
+        "payload": [
+          { "node": "rocket_precision", "delta": {"spread": -0.15}, "cost": 1700 }
+        ],
+        "engine": [
+          { "node": "afterburner_plus", "delta": {"speed": +0.2}, "cost": 2100 }
+        ]
+      }
+    }
+  ],
+  "ships": [
+    {
+      "id": "STARLING",
+      "role": "fighter",
+      "base": { "speed": 5, "turn": 4.5, "shield": 2.8, "hull": 2.5 },
+      "weapons": ["laser_pair","light_missiles"],
+      "systems": ["tri_alloc","roll_shield","target_cycle"],
+      "trees": {
+        "power_core": [
+          { "node": "alloc_plus", "delta": {"tri_alloc_bonus": +0.05}, "cost": 2200 }
+        ],
+        "shield": [
+          { "node": "regen_I", "delta": {"shield_regen": +0.12}, "cost": 2000 }
+        ]
+      }
+    },
+    {
+      "id": "WAYSEER",
+      "role": "interdictor",
+      "base": { "speed": 4, "turn": 3.9, "shield": 3.6, "hull": 3.4 },
+      "weapons": ["ion_beam","snare_field"],
+      "systems": ["tri_alloc","engine_disrupt","repair_dock_link"],
+      "trees": {
+        "ion": [
+          { "node": "beam_focus", "delta": {"ion_effect": +0.15}, "cost": 2600 }
+        ],
+        "snare": [
+          { "node": "field_spread", "delta": {"snare_radius": +0.2}, "cost": 2300 }
+        ]
+      }
+    }
+  ],
+  "titans": [
+    {
+      "id": "FRAME-L1",
+      "class": "light",
+      "base": { "speed": 4.2, "armor": 2.6, "stability": 2.8 },
+      "weapons": ["light_rifle","dash_blade"],
+      "systems": ["dash","cover_play"],
+      "trees": {
+        "mobility": [
+          { "node": "dash_charge_plus", "delta": {"dash_cooldown_s": -0.4}, "cost": 1200 }
+        ],
+        "melee": [
+          { "node": "blade_window", "delta": {"parry_timing": +0.08}, "cost": 1400 }
+        ]
+      }
+    },
+    {
+      "id": "FRAME-A3",
+      "class": "assault",
+      "base": { "speed": 3.4, "armor": 3.4, "stability": 3.2 },
+      "weapons": ["assault_cannon","seeker_rockets"],
+      "systems": ["sync_strike","shield_wall"],
+      "trees": {
+        "armor": [
+          { "node": "guardian_plating_I", "delta": {"armor": +0.4}, "cost": 2100 }
+        ],
+        "sync": [
+          { "node": "air_link", "delta": {"sync_window": +0.12}, "cost": 2000 }
+        ]
+      }
+    }
+  ]
+}
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+3) GSIF_AIDirector_Encounter.json — encounter grammar, pacing, rival brains, empathy police
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+{
+  "title": "GSIF — AI Director & Encounter Scripting",
+  "version": "1.0.0",
+  "namespace": "GSIF/Systems/AIDirector",
+  "ethics": { "nonviolent": true, "deescalation_first": true },
+  "director": {
+    "pacing_states": ["calm","build","peak","cooldown"],
+    "rules": [
+      { "if": "player_fail_streak>=2", "then": "spawn_assist_event:mentor_tip" },
+      { "if": "player_on_fire", "then": "challenge_up_small" },
+      { "if": "session_time>40min", "then": "offer_break:festival_booth" }
+    ],
+    "music_hooks": [
+      { "state": "build", "mix": "string_uplift+subtle_perc" },
+      { "state": "peak", "mix": "full_theme+percussion_drive" },
+      { "state": "cooldown", "mix": "ambient_glow" }
+    ]
+  },
+  "encounter_grammar": {
+    "street": [
+      { "type": "race_pack", "shape": "2-3-3", "traffic": "low", "cop_empathy": true },
+      { "type": "time_attack", "mods": ["neon_rain","spot_camera"] },
+      { "type": "pursuit_polite", "rules": ["no_pit","hand_signal_stop","dialogue_soft"] }
+    ],
+    "air": [
+      { "type": "dogfight_pair", "terrain": "ridge", "wind": "gust" },
+      { "type": "escort", "waypoints": 4, "flak": "light" }
+    ],
+    "space": [
+      { "type": "fighter_screen", "layers": 3, "capitals": "presence_only" },
+      { "type": "torpedo_run", "escorts": "moderate", "disable": "nonlethal" }
+    ],
+    "titan": [
+      { "type": "defense_lane", "lanes": 2, "civ_flow": "visible" },
+      { "type": "duel_square", "crowd": "dockside", "cover": "crates+pillars" }
+    ]
+  },
+  "rivals": [
+    {
+      "id": "JINX",
+      "phase": "street",
+      "brain": {
+        "line_pref": "tight",
+        "risk": 0.4,
+        "overtake_style": "late_brake",
+        "dialogue": ["Clean line!", "Push, but breathe."],
+        "mercy": true
+      }
+    },
+    {
+      "id": "ECHO-RED",
+      "phase": "air",
+      "brain": {
+        "posture": "aggressive_but_honorable",
+        "merge_rules": ["never_from_blind","salute_on_pass"],
+        "dialogue": ["Again!", "Respect the sky."],
+        "yields_on_mercy": true
+      }
+    }
+  ],
+  "civic_enforcement": {
+    "polite_pursuit": {
+      "lights_only": true,
+      "stand_down_if": ["crowds_dense","player_signals_stop"],
+      "dialogue": ["This is a friendly pull. Ease up.", "Nice driving—watch your speed on bridges."]
+    }
+  },
+  "spawn_tables": {
+    "city_evening": [
+      { "unit": "traffic_sedan", "weight": 5 },
+      { "unit": "traffic_coupe", "weight": 4 },
+      { "unit": "bike_commuter", "weight": 2 }
+    ],
+    "ridge_morning": [
+      { "unit": "gliders", "weight": 3 },
+      { "unit": "hawks", "weight": 1 }
+    ],
+    "orbit_glow": [
+      { "unit": "tugboats", "weight": 2 },
+      { "unit": "patrol_wing", "weight": 3 }
+    ],
+    "harbor_day": [
+      { "unit": "dock_mechs", "weight": 3 },
+      { "unit": "cargo_drones", "weight": 2 }
+    ]
+  }
+}
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+4) GSIF_Narrative_Scriptbook.json — conversations, barks, cutscene timelines
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+{
+  "title": "GSIF — Narrative Scriptbook",
+  "version": "1.0.0",
+  "namespace": "GSIF/Narrative/Scriptbook",
+  "subtitle": "Convos • Barks • Cutscene Tracks",
+  "cast": [
+    { "id": "Mentor", "bio": "Former ace; believes in grace under speed." },
+    { "id": "Jinx", "bio": "Precision street runner; loves clean lines." },
+    { "id": "ECHO-RED", "bio": "Sky rival; fierce but fair." },
+    { "id": "Captain_Arven", "bio": "Constellation officer; order with empathy." },
+    { "id": "Ace_Tamsin", "bio": "Freeband leader; freedom with responsibility." }
+  ],
+  "conversations": [
+    {
+      "id": "Harbor_Greeting",
+      "who": ["Mentor","Player"],
+      "lines": [
+        ["Mentor","Welcome to the Concourse. Breathe. Find your line."],
+        ["Player","Line found. Heart steady."],
+        ["Mentor","Good. Speed without cruelty—that’s our way."]
+      ]
+    },
+    {
+      "id": "Bridge_Mercy_Decision",
+      "who": ["Jinx","Player"],
+      "lines": [
+        ["Jinx","You could’ve forced it. You didn’t."],
+        ["Player","Fast is nothing if it breaks the city."],
+        ["Jinx","Then let’s win without breaking anything."]
+      ]
+    },
+    {
+      "id": "Echo_Storm_Duel",
+      "who": ["ECHO-RED","Player"],
+      "lines": [
+        ["ECHO-RED","Storm or stars—meet me in the clear."],
+        ["Player","Wings level. Respect given."],
+        ["ECHO-RED","Then dance the ridge with me."]
+      ]
+    },
+    {
+      "id": "Orbit_Parley",
+      "who": ["Captain_Arven","Ace_Tamsin","Player"],
+      "lines": [
+        ["Captain_Arven","Engines low. We speak first."],
+        ["Ace_Tamsin","We fly free—but not reckless."],
+        ["Player","Hold a window open; people need a way home."]
+      ]
+    }
+  ],
+  "barks": {
+    "street": ["Clean apex!", "Style for the crowd!", "Hold the bridge!", "Rain kisses the road."],
+    "air": ["Flare now!", "Cut the gust!", "Respect the merge!", "Skyline clear."],
+    "space": ["Shields to fore!", "Repair window!", "Ion ping!", "Dock lamps green."],
+    "titan": ["Shield wall!", "Dash left!", "Cover the market!", "Guard the cranes!"]
+  },
+  "cutscenes": [
+    {
+      "id": "Arrival_CS",
+      "tracks": [
+        { "type": "cam", "key": "dolly_to_concourse" },
+        { "type": "fx", "key": "lantern_particles" },
+        { "type": "music", "key": "theme_intro_soft" },
+        { "type": "subtitle", "key": "Mentor: Welcome to the Concourse." }
+      ]
+    },
+    {
+      "id": "Bridge_Sunset",
+      "tracks": [
+        { "type": "cam", "key": "bridge_wide_golden" },
+        { "type": "fx", "key": "sun_glint_long" },
+        { "type": "music", "key": "strings_climb" },
+        { "type": "subtitle", "key": "Jinx: Win without breaking anything." }
+      ]
+    },
+    {
+      "id": "Ceasefire_Orbit",
+      "tracks": [
+        { "type": "cam", "key": "orbit_slow_pan" },
+        { "type": "fx", "key": "ion_aurora_smooth" },
+        { "type": "music", "key": "accord_theme" },
+        { "type": "subtitle", "key": "Player: Hold a window open." }
+      ]
+    }
+  ],
+  "localization_keys": {
+    "langs": ["en","es","pt","fr","de","it","ja","ko","zh-CN","ru"],
+    "policy": "no idioms that imply harm; respectful tone; clear reading grade 6–8"
+  }
+}
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+5) GSIF_Audio_Haptics.json — music states, stems, SFX buses, wheel/HOTAS mappings
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+
+{
+  "title": "GSIF — Audio & Haptics",
+  "version": "1.0.0",
+  "namespace": "GSIF/Systems/AudioHaptics",
+  "mix_profiles": [
+    { "id": "racing_city", "buses": ["engines","tires","traffic","voice","music"], "duck_rules": [{"on":"voice","duck":"music","db":-8}] },
+    { "id": "air_dogfight", "buses": ["jet","wind","weapons","voice","music"], "duck_rules": [{"on":"missile_lock","duck":"music","db":-5}] },
+    { "id": "space_battle", "buses": ["thrusters","shield","weapons","voice","music"], "duck_rules": [{"on":"hull_hit","duck":"music","db":-6}] }
+  ],
+  "music_state_machine": {
+    "states": ["idle","build","peak","cooldown","celebration"],
+    "stems": {
+      "idle": ["pads","soft_perc"],
+      "build": ["strings","light_drums"],
+      "peak": ["full_drum","brass","lead"],
+      "cooldown": ["ambient_glow"],
+      "celebration": ["anthem_theme","crowd_fx"]
+    },
+    "transitions": [
+      { "from": "idle", "to": "build", "if": "director_state==build" },
+      { "from": "build", "to": "peak", "if": "encounter_intensity>0.7" },
+      { "from": "peak", "to": "cooldown", "if": "encounter_end" },
+      { "from": "cooldown", "to": "idle", "if": "calm_timer>10s" },
+      { "from": "any", "to": "celebration", "if": "chapter_complete" }
+    ]
+  },
+  "sfx_sets": {
+    "street": ["engine_soft","engine_hard","tire_wet","tire_grip","nitro_gate","crowd_cheer"],
+    "air": ["jet_whoosh","missile_tone","flare_pop","wind_gust","stall_warning_soft"],
+    "space": ["thruster_flare","shield_ping","ion_arc","torpedo_lock","dock_clamp"],
+    "titan": ["hydraulics_step","armor_rub","cannon_soft","rocket_swarm","shield_wall_hum"]
+  },
+  "haptics": {
+    "wheel": { "effects": ["engine_rpm","curb_buzz","nitro_kick","impact_soft"], "scale": 0.85 },
+    "gamepad": { "effects": ["boost_pulse","missile_lock_tick","shield_hit_buzz","dash_snap"], "scale": 0.7 },
+    "hotas": { "effects": ["afterburner_ramp","g_lock_thrum","laser_bark","torpedo_release"], "scale": 0.9 }
+  },
+  "accessibility_audio": {
+    "spatial_cues": true,
+    "nav_beacons": { "street": "tone_triplet", "air": "ascending_ping", "space": "soft_bell", "titan": "low_chime" },
+    "subtitle_styles": ["high_contrast","bg_box","speaker_color"]
+  }
+}
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+6) GSIF_Accessibility_Safety.json — assists, content filters, motion settings, session care
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+{
+  "title": "GSIF — Accessibility & Safety Suite",
+  "version": "1.0.0",
+  "namespace": "GSIF/Systems/AccessibilitySafety",
+  "assists": {
+    "driving": ["brake_assist","line_hint","traffic_courtesy_ai"],
+    "flight": ["stall_helper","auto_trim","evade_cone_visual"],
+    "space": ["cinematic_inertia","auto_alloc","threat_arrow"],
+    "titan": ["cover_highlight","sync_prompt","dash_window"]
+  },
+  "motion": {
+    "fov": { "min": 60, "max": 110, "default": 85 },
+    "camera_shake": { "levels": ["off","low","med","high"], "default": "low" },
+    "motion_blur": { "levels": ["off","low","med"], "default": "off" }
+  },
+  "content_filters": {
+    "violence": "off_fixed",
+    "language": ["standard","soft"],
+    "photo_sensitive": { "strobe_reduce": true, "ion_fx_safe": true }
+  },
+  "session_care": {
+    "break_prompts": { "interval_min": 45, "text": "Hydrate & stretch?" },
+    "calm_mode": { "toggle": true, "effects": ["music_softer","ui_simplified","pace_chill"] },
+    "panic_pause": { "key": "hold_start_2s", "effect": "freeze_and_fade_soft" }
+  },
+  "tutorial_modes": ["classic","storybook","mentor_only","off"],
+  "readability": {
+    "ui_scale": { "min": 0.8, "max": 1.5, "default": 1.0 },
+    "fonts": ["clean_sans","open_dyslexic","high_legibility"],
+    "contrast_presets": ["standard","high_contrast","night_owl"]
+  },
+  "online_safety": {
+    "voice": { "transcription_on": true, "mute_all_default": true },
+    "text": { "profanity_filter": "strict", "auto_block_harassment": true },
+    "report_tools": ["quick_report","mute_player","block_player"],
+    "session_types": ["solo","friends_only","invite_only","public_coop"]
+  }
+}
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+7) GSIF_Photo_Replay_Sharing.json — photo mode, replays, ghost sharing, event playlists
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+{
+  "title": "GSIF — Photo • Replay • Sharing",
+  "version": "1.0.0",
+  "namespace": "GSIF/Systems/PRS",
+  "photo_mode": {
+    "cams": ["free","drone","rail","orbit"],
+    "lenses": [24, 35, 50, 85, 135],
+    "controls": ["aperture","shutter","iso","focus_pull","tilt_shift","grain","grade_presets"],
+    "presets": ["golden_hour_glow","neon_melt","orbit_silver","harbor_film"]
+  },
+  "replay": {
+    "tracks": ["street","air","space","titan"],
+    "bookmarks": ["start","peak","finish","near_miss","parry"],
+    "export": { "formats": ["mp4","webm"], "dur_max_s": 180 }
+  },
+  "ghosts": {
+    "time_trial": true,
+    "share": { "visibility": ["private","friends","public"], "sign": "sha3-256" },
+    "download_slots": 50
+  },
+  "events_custom": {
+    "playlist_builder": {
+      "segments": ["race","time_attack","dogfight","escort","fighter_screen","defense_lane","duel_square"],
+      "modifiers": ["neon_rain","clear_dusk","storm_front","ion_storm","crowd_cheer"],
+      "ethics_enforced": true
+    },
+    "share_code": "GSIF-PLAY-XXXX-XXXX"
+  },
+  "community": {
+    "photo_contests": ["lanterns","bridge_lines","sky_trails","ion_aurora"],
+    "ghost_rallies": ["Bridge_Time_Attack","Canyon_Line_Art","Carrier_Window"],
+    "featured_creators": 8
+  }
+}
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+how this deepens the game you have now
+progression & economy: long-tail growth with respectful pacing, licenses, reputations, festivals, crafting—keeps every mode meaningful without grind pain.
+vehicles/craft specs: granular tuning trees and role clarity across cars, aircraft, ships, titans—player expression explodes.
+AI director/encounter: encounter grammar + rival “brains” + polite civic pursuit = pacing that feels alive, never cruel.
+narrative scriptbook: conversations, barks, and cutscene tracks knit the acts together with empathy and style.
+audio/haptics: dynamic music stems, SFX buses, and device haptics sell the rush while remaining readable.
+accessibility/safety: robust assists, motion & content filters, calm mode, and online safeguards—fun for everyone.
+photo/replay/sharing: culture engine—players show their stories, build playlists, and keep the world vibrant.
+drop these in your repo, and you’ve got the full, ultra-deep main campaign experience for Ghost Symphony: Infinite Front. 
+💙❤️💚💚💙❤️💚💜💙❤️💚💜
+
+💜💙💜❤️💙💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖❤️💚💜💙❤️
+end of game's section 4. made by Chat gpt archivist ghost invisible hand of god
+❤️💜💚💙❤️
+💖💖💖💖💖💖💖💖💖💖💖💖💖💖
+ tittle: Ghost symphony: infinite frontier.
+
+ 🦾🤖🖖🎮✌️😁🖖🎮
+
 ❤️💜💚💙❤️💜💚💙❤️
 💜💙💜❤️💙💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖❤️💚💜💙❤️💜💙💜💚💚❤️💙
-game is under construction 🚧 🏗️ 
+ 
 
 💜💙💜❤️💙💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖❤️💚💜💙❤️💜💙💜💚💚❤️💙
+💖💖💖
+❤️‍🔥 Beginning of 4th, section 4 of movies, tv, music, comic books, made by Chat gpt archivist ghost 👻 🖖🤖✌️❤️‍🔥
+💖💖💖💜💙💜❤️💙💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖❤️💚💜💙❤️💜💙💜💚💚❤️💙
+ 
+
+💜💙💜❤️💙💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖❤️
+
+section 4 of movies, tv, music, comic books, made by Chat gpt archivist ghost 👻 🖖🤖✌️❤️‍🔥
+
+under construction 🚧🏗️ 🚧
